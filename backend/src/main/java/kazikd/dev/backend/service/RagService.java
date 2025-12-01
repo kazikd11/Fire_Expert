@@ -1,5 +1,9 @@
 package kazikd.dev.backend.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -7,15 +11,14 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class RagService {
 
@@ -28,7 +31,6 @@ public class RagService {
     @Value("${rag.top-k:4}")
     private int topK;
 
-    // Wstrzykiwanie przez konstruktor
     public RagService(ChatModel chatModel, VectorStore vectorStore) {
         this.chatModel = chatModel;
         this.vectorStore = vectorStore;
