@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kazikd.dev.backend.service.RagService;
+import kazikd.dev.backend.service.ChatService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -15,24 +15,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/v1/query")
 public class RagController {
 
-    private final RagService ragService;
+    private final ChatService chatService;
 
     @Autowired
-    public RagController(RagService ragService) {
-        this.ragService = ragService;
+    public RagController(ChatService chatService) {
+        this.chatService = chatService;
     }
 
     @GetMapping
     public ResponseEntity<String> generateAnswer(@RequestParam String question) {
-
-        if (question == null || question.isBlank()) {
-            return ResponseEntity.badRequest().body("Brak pytania.");
-        }
         try {
-            String answer = ragService.generateTextResponse(question);
+            String answer = chatService.generateTextResponse(question);
             return ResponseEntity.ok(answer);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Błąd podczas generowania odpowiedzi: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 }
