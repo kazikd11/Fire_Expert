@@ -139,7 +139,6 @@ public class DocumentAiService {
     private String readBatchOutputFromGcs(String outputPrefix) throws IOException {
         log.debug("Reading batch output from GCS: {}", outputPrefix);
         
-        // List all output files (Document AI creates JSON files)
         Iterable<Blob> blobs = storage.list(gcsBucketName, 
                 Storage.BlobListOption.prefix(outputPrefix)).iterateAll();
         

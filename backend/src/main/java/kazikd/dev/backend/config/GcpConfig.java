@@ -15,13 +15,11 @@ import com.google.cloud.storage.StorageOptions;
 @Configuration
 public class GcpConfig {
 
-    //storage
     @Bean
     public Storage googleCloudStorage() {
         return StorageOptions.getDefaultInstance().getService();
     }
 
-    //document AI
     @Bean
     public DocumentProcessorServiceClient documentProcessorServiceClient(
             @Value("${document-ai.endpoint}") String endpoint
@@ -29,7 +27,6 @@ public class GcpConfig {
         return DocumentProcessorServiceClient.create(DocumentProcessorServiceSettings.newBuilder().setEndpoint(endpoint).build());
     }
 
-    //vertex AI embedding
     @Bean
     public VertexAiEmbeddingConnectionDetails vertexAiEmbeddingConnectionDetails(
             @Value("${spring.ai.vertex.ai.embedding.project-id}") String projectId,

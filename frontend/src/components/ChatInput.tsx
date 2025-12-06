@@ -38,18 +38,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         />
         <button
           type="submit"
-          className="send-button"
+          className={`send-button ${disabled ? 'loading' : ''}`}
           disabled={!input.trim() || disabled}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M7 11L12 6L17 11M12 18V7"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          {disabled ? (
+            <div className="loading-spinner"></div>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M7 11L12 6L17 11M12 18V7"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
         </button>
       </form>
     </div>

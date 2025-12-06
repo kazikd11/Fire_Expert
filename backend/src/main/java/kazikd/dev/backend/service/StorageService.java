@@ -2,19 +2,16 @@ package kazikd.dev.backend.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.channels.Channels;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.google.auth.Credentials;
-import com.google.auth.ServiceAccountSigner;
-import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import com.google.auth.Credentials;
+import com.google.auth.ServiceAccountSigner;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.documentai.v1.GcsDocument;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.BlobId;
@@ -89,79 +86,6 @@ public class StorageService {
             throw new RuntimeException("Failed to download file: " + fileName, e);
         }
     }
-
-    public String uploadPageImage(String documentName, int pageNumber, byte[] imageBytes) {
-        String imagePath = String.format("%s%s_page_%d.png", PAGE_IMAGES_FOLDER, 
-            documentName.replace(".pdf", ""), pageNumber);
-        
-        log.debug("Uploading page image to GCS: {}", imagePath);
-        
-        try {
-            BlobId blobId = BlobId.of(gcsBucketName, imagePath);
-            BlobInfo blobInfo = BlobInfo.newBuilder(blobId)
-                .setContentType(MIME_TYPE_PNG)
-                .build();
-            
-            storage.create(blobInfo, imageBytes);
-            
-            log.debug("Successfully uploaded page image: {}", imagePath);
-            return getGcsUri(imagePath);
-            
-        } catch (Exception e) {
-            log.error("Error uploading page image {}: {}", imagePath, e.getMessage(), e);
-            throw new RuntimeException("Failed to upload page image: " + imagePath, e);
-        }
-    }
-
-//    public byte[] downloadPageImage(String documentName, int pageNumber) {
-//        String imagePath = String.format("%s%s_page_%d.png", PAGE_IMAGES_FOLDER,
-//            documentName.replace(".pdf", ""), pageNumber);
-//
-//        try {
-//            Blob blob = storage.get(gcsBucketName, imagePath);
-//            if (blob == null) {
-//                return null;
-//            }
-//            return blob.getContent();
-//        } catch (Exception e) {
-//            log.warn("Error downloading page image {}: {}", imagePath, e.getMessage());
-//            return null;
-//        }
-//    }
-
-    public String getPresignedUrl(String fileName){
-        ClassPathResource resource = new ClassPathResource(KEY_FILE_NAME);
-        Credentials credentials;
-        try (InputStream stream = resource.getInputStream()) {
-            credentials = GoogleCredentials.fromStream(stream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        if (credentials instanceof ServiceAccountSigner signer) {
-        return storage.signUrl(
-                BlobInfo.newBuilder(gcsBucketName, fileName).build(),
-                15,
-                TimeUnit.MINUTES,
-                Storage.SignUrlOption.withV4Signature(),
-                Storage.SignUrlOption.signWith(signer)
-        ).toString();
-        } else {
-            throw new IllegalArgumentException("Credentials are not an instance of ServiceAccountSigner");
-        }
-    }
-
-    public boolean pageImageExists(String documentName, int pageNumber) {
-        String imagePath = String.format("%s%s_page_%d.png", PAGE_IMAGES_FOLDER, 
-            documentName.replace(".pdf", ""), pageNumber);
-        
-        Blob blob = storage.get(gcsBucketName, imagePath);
-        return blob != null && blob.exists();
-    }
-
-//    public void clearCache() {
-//        pdfCache.clear();
-//        log.info("PDF cache cleared");
-//    }
     
     public String getGcsUriForFile(String fileName) {
         return getGcsUri(fileName);

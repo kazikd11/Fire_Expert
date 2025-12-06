@@ -1,12 +1,15 @@
 package kazikd.dev.backend.controller;
 
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import kazikd.dev.backend.model.ChatRequest;
 import kazikd.dev.backend.service.ChatService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,13 +25,26 @@ public class RagController {
         this.chatService = chatService;
     }
 
-    @GetMapping
-    public ResponseEntity<String> generateAnswer(@RequestParam String question) {
+    @PostMapping
+    public ResponseEntity<kazikd.dev.backend.model.ChatResponse> generateAnswer(@RequestBody ChatRequest request) {
         try {
-            String answer = chatService.generateTextResponse(question);
-            return ResponseEntity.ok(answer);
+            log.info("Received question with {} previous messages", 
+                    request.getPreviousMessages() != null ? request.getPreviousMessages().size() : 0);
+            
+            var result = chatService.generateTextResponse(
+                    request.getQuestion(), 
+                    request.getPreviousMessages() != null ? request.getPreviousMessages() : Collections.emptyList()
+            );
+            
+            return ResponseEntity.ok(new kazikd.dev.backend.model.ChatResponse(
+                    result.getAnswer(), 
+                    "success", 
+                    result.isUsedFullDocuments()
+            ));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            log.error("Error generating answer: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                    .body(new kazikd.dev.backend.model.ChatResponse("Przepraszam, wystąpił błąd. Spróbuj ponownie.", "error", false));
         }
     }
 }
